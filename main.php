@@ -8,7 +8,7 @@ require_once('includes/TimeClock_GUI.class.php');
 require_once('includes/DataSource.interface.php');
 require_once('includes/DataSources/MySQL_DataSource.datasource.php');
 
-$credentials = unserialize(file('database.cfg'));
+$credentials = unserialize(file_get_contents('database.cfg'));
 
 if(!$datasource = new MySQL_DataSource('localhost', $credentials)) die('Could not initialize data source');
 

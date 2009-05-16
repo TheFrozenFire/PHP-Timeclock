@@ -188,8 +188,8 @@ class TimeClock_GUI {
 		$clockInValue = $model->get_value($iter, 5);
 		$clockOutValue = $model->get_value($iter, 6);
 		
-		$clockInDisplay = is_null($clockInValue);
-		$clockOutDisplay = (!is_null($clockInValue) && is_null($clockOutValue));
+		$clockInDisplay = empty($clockInValue);
+		$clockOutDisplay = (!empty($clockInValue) && empty($clockOutValue));
 		
 		$this->clockInButton->set_sensitive($clockInDisplay);
 		$this->clockOutButton->set_sensitive($clockOutDisplay);

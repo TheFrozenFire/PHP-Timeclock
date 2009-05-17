@@ -6,11 +6,11 @@ chdir(dirname(__FILE__));
 
 require_once('includes/TimeClock_GUI.class.php');
 require_once('includes/DataSource.interface.php');
-require_once('includes/DataSources/MySQL_DataSource.datasource.php');
+require_once('includes/DataSources/SQLite_DataSource.datasource.php');
 
-$credentials = unserialize(file_get_contents('database.cfg'));
+//$credentials = unserialize(file_get_contents('database.cfg'));
 
-if(!$datasource = new MySQL_DataSource('localhost', $credentials)) die('Could not initialize data source');
+if(!$datasource = new SQLite_DataSource(dirname(__FILE__).'/phptimeclock.sqlite')) die('Could not initialize data source');
 
 $gui = new TimeClock_GUI($datasource);
 

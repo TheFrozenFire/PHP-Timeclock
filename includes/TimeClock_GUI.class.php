@@ -43,9 +43,12 @@ class TimeClock_GUI {
 		$menu->add($menuFile);
 		$menuFileMenu = new GtkMenu();
 		$menuFile->set_submenu($menuFileMenu);
+		$menuFileEdit = new GtkImageMenuItem(Gtk::STOCK_EDIT);
+		$menuFileMenu->add($menuFileEdit);
 		$menuFileQuit = new GtkImageMenuItem(Gtk::STOCK_QUIT);
 		$menuFileMenu->add($menuFileQuit);
 		
+		$menuFileEdit->connect_simple('activate', array($this, 'editEmployees'));
 		$menuFileQuit->connect_simple('activate', array($this, 'shutdown'));
 		
 		$menuHelp = new GtkMenuItem('_Help');
@@ -130,11 +133,11 @@ class TimeClock_GUI {
 		$clockOutButton->set_image(GtkImage::new_from_stock(Gtk::STOCK_NO, Gtk::ICON_SIZE_BUTTON));
 		$clockOutButton->set_sensitive(FALSE);
 		$clockOutButton->connect_simple('clicked', array($this, 'clockOut'), $employeeview);
-		$buttonMenu->add($addScheduleButton = new GtkButton('Add Employee'));
+		$buttonMenu->add($addScheduleButton = new GtkButton('Add Entry'));
 		$addScheduleButton->set_image(GtkImage::new_from_stock(Gtk::STOCK_ADD, Gtk::ICON_SIZE_BUTTON));
-		$addScheduleButton->connect_simple('clicked', array($this, 'addEmployee'));
-		$buttonMenu->add($removeScheduleButton = new GtkButton('Remove Employee'));
-		$removeScheduleButton->connect_simple('clicked', array($this, 'removeEmployee'), $employeeview);
+		$addScheduleButton->connect_simple('clicked', array($this, 'addEntry'));
+		$buttonMenu->add($removeScheduleButton = new GtkButton('Remove Entry'));
+		$removeScheduleButton->connect_simple('clicked', array($this, 'removeEntry'), $employeeview);
 		$removeScheduleButton->set_image(GtkImage::new_from_stock(Gtk::STOCK_REMOVE, Gtk::ICON_SIZE_BUTTON));
 	}
 	
@@ -149,6 +152,49 @@ class TimeClock_GUI {
 		
 		$aboutDialog->run();
 		$aboutDialog->destroy();
+	}
+	
+	public function editEmployees() {
+		$dialog = new GtkDialog(
+			'Add Employee',
+			NULL,
+			Gtk::DIALOG_MODAL,
+			array(
+				Gtk::STOCK_CANCEL, Gtk::RESPONSE_CANCEL,
+				Gtk::STOCK_OK, Gtk::RESPONSE_OK
+			)
+		);
+		
+		$hBox = new GtkHBox();
+		$dialog->vbox->pack_start($hBox, TRUE);
+		
+		if(!$employees = $this->datasource->getEmployees()) $employees = array();
+		
+		$employeeStore = new GtkListStore(
+			GObject::TYPE_LONG,
+			GObject::TYPE_STRING
+		);
+		foreach($employees as $employee) $employeeStore->append(array($employee['id'], "{$employee['lastname']}, {$employee['firstname']}"));
+		
+		$employeeView = new GtkTreeView($employeeStore);
+		$renderer = new GtkCellRendererText();
+		$idColumn = new GtkTreeViewColumn('ID', $renderer, 'text', 0);
+		$employeeView->append_column($idColumn);
+		$nameColumn = new GtkTreeViewColumn('Name', $renderer, 'text', 1);
+		$employeeView->append_column($nameColumn);
+		
+		$hBox->pack_start($employeeView, TRUE);
+		
+		$toolButtons = new GtkVButtonBox();
+		$hBox->pack_start($toolButtons, FALSE);
+		
+		$toolButtons->add($addEmployee = GtkToolButton::new_from_stock(Gtk::STOCK_ADD));
+		$toolButtons->add($removeEmployee = GtkToolButton::new_from_stock(Gtk::STOCK_REMOVE));
+		$toolButtons->add($editEmployee = GtkToolButton::new_from_stock(Gtk::STOCK_EDIT));
+		
+		$dialog->show_all();
+		$dialog->run();
+		$dialog->destroy();
 	}
 	
 	public function refreshWorkspace() {
@@ -213,13 +259,13 @@ class TimeClock_GUI {
 		$this->refreshWorkspace();
 	}
 	
-	public function addEmployee() {
+	public function addEntry() {
 		$calendar = $this->calendar;
 		$dateArray = $calendar->get_date();
 		
 		$date = mktime(0, 0, 0, $dateArray[1]+1, $dateArray[2], $dateArray[0]);
 		
-		$employees = $this->datasource->getEmployees();
+		if(!$employees = $this->datasource->getEmployees()) $employees = array();
 	
 		$dialog = new GtkDialog(
 			'Add Employee for '.date('F j, Y', $date),
@@ -307,7 +353,7 @@ class TimeClock_GUI {
 		return TRUE;
 	}
 	
-	public function removeEmployee($view) {
+	public function removeEntry($view) {
 		$selection = $view->get_selection();
 		list($model, $iter) = $selection->get_selected();
 		

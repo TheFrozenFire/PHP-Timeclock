@@ -13,10 +13,8 @@ class SQLite_DataSource implements DataSource {
 			} catch (PDOException $e) {
 				die($e);
 			}
-			$this->connection->query(
-'CREATE TABLE "employees" ("id" INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL , "last_name" TEXT NOT NULL , "first_name" TEXT NOT NULL , "active" INTEGER DEFAULT 1);
-CREATE TABLE "schedule" ("id" INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL , "employeeid" INTEGER NOT NULL , "arrival_time" INTEGER NOT NULL , "departure_time" INTEGER NOT NULL , "clockintime" INTEGER, "clockouttime" INTEGER);'
-			);
+			$this->connection->query('CREATE TABLE "employees" ("id" INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL , "last_name" TEXT NOT NULL , "first_name" TEXT NOT NULL , "active" INTEGER DEFAULT 1);');
+			$this->connection->query('CREATE TABLE "schedule" ("id" INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL , "employeeid" INTEGER NOT NULL , "arrival_time" INTEGER NOT NULL , "departure_time" INTEGER NOT NULL , "clockintime" INTEGER, "clockouttime" INTEGER);');
 		} else try {
 			$this->connection = new PDO("sqlite:$source");
 		} catch (PDOException $e) {

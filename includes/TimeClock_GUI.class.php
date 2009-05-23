@@ -156,11 +156,10 @@ class TimeClock_GUI {
 	
 	public function editEmployees() {
 		$dialog = new GtkDialog(
-			'Add Employee',
+			'Edit Employees',
 			NULL,
 			Gtk::DIALOG_MODAL,
 			array(
-				Gtk::STOCK_CANCEL, Gtk::RESPONSE_CANCEL,
 				Gtk::STOCK_OK, Gtk::RESPONSE_OK
 			)
 		);
@@ -194,6 +193,98 @@ class TimeClock_GUI {
 		
 		$dialog->show_all();
 		$dialog->run();
+		$dialog->destroy();
+	}
+	
+	public function editEmployeesAdd($employeeStore) {
+		$dialog = new GtkDialog(
+			'Add Employee',
+			NULL,
+			Gtk::DIALOG_MODAL,
+			array(
+				Gtk::STOCK_CANCEL, Gtk::RESPONSE_CANCEL,
+				Gtk::STOCK_OK, Gtk::RESPONSE_OK
+			)
+		);
+		
+		$lastNameBox = new GtkHBox();
+		$dialog->vbox->pack_start($lastNameBox, FALSE);
+		
+		$lastNameBox->pack_start(new GtkLabel('Last Name: '), FALSE);
+		$lastNameBox->pack_start($lastNameEntry = new GtkEntry(), TRUE);
+		
+		$firstNameBox = new GtkHBox();
+		$dialog->vbox->pack_start($firstNameBox, FALSE);
+		
+		$firstNameBox->pack_start(new GtkLabel('First Name: '), FALSE);
+		$firstNameBox->pack_start($firstNameEntry = new GtkEntry(), TRUE);
+		
+		$dialog->show_all();
+		if($dialog->run() === Gtk::RESPONSE_OK) {
+			$lastName = $lastNameEntry->get_text();
+			$firstName = $firstNameEntry->get_text();
+			
+			$this->datasource->addEmployee($lastName, $firstName);
+			
+			if(!$employees = $this->datasource->getEmployees()) $employees = array();
+			$employeeStore->clear();
+			foreach($employees as $employee) $employeeStore->append(array($employee['id'], "{$employee['lastname']}, {$employee['firstname']}"));
+		}
+		$dialog->destroy();
+	}
+	
+	public function editEmployeesRemove($employeeView, $employeeStore) {
+		list($model, $iter) = $employeeStore->get_selection()->get_selected();
+		
+		$id = $model->get_value($iter, 0);
+		
+		$this->datasource->removeEmployee($id);
+		
+		if(!$employees = $this->datasource->getEmployees()) $employees = array();
+		$employeeStore->clear();
+		foreach($employees as $employee) $employeeStore->append(array($employee['id'], "{$employee['lastname']}, {$employee['firstname']}"));
+	}
+	
+	public function editEmployeesEdit($employeeView, $employeeStore) {
+		$dialog = new GtkDialog(
+			'Edit Employee',
+			NULL,
+			Gtk::DIALOG_MODAL,
+			array(
+				Gtk::STOCK_CANCEL, Gtk::RESPONSE_CANCEL,
+				Gtk::STOCK_OK, Gtk::RESPONSE_OK
+			)
+		);
+		
+		list($model, $iter) = $employeeView->get_selection()->get_selected();
+		
+		$id = $model->get_value($iter, 0);
+		
+		$employee = $this->datasource->getEmployee($id);
+		
+		$lastNameBox = new GtkHBox();
+		$dialog->vbox->pack_start($lastNameBox, FALSE);
+		
+		$lastNameBox->pack_start(new GtkLabel('Last Name: '), FALSE);
+		$lastNameBox->pack_start($lastNameEntry = new GtkEntry($employee['lastname']), TRUE);
+		
+		$firstNameBox = new GtkHBox();
+		$dialog->vbox->pack_start($firstNameBox, FALSE);
+		
+		$firstNameBox->pack_start(new GtkLabel('First Name: '), FALSE);
+		$firstNameBox->pack_start($firstNameEntry = new GtkEntry($employee['firstname']), TRUE);
+		
+		$dialog->show_all();
+		if($dialog->run() === Gtk::RESPONSE_OK) {
+			$lastName = $lastNameEntry->get_text();
+			$firstName = $firstNameEntry->get_text();
+			
+			$this->datasource->editEmployee($id, $lastName, $firstName);
+			
+			if(!$employees = $this->datasource->getEmployees()) $employees = array();
+			$employeeStore->clear();
+			foreach($employees as $employee) $employeeStore->append(array($employee['id'], "{$employee['lastname']}, {$employee['firstname']}"));
+		}
 		$dialog->destroy();
 	}
 	

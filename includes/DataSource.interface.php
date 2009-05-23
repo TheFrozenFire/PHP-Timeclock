@@ -43,7 +43,7 @@ interface DataSource {
 	//	$arrival: A unix timestamp indicating the arrival time of the employee.
 	//	$departure: A unix timestamp indicating the departure time of the employee.
 	// Return
-	//	Returns TRUE on success.
+	//	Return TRUE on success.
 	//	Return FALSE on failure.
 	public function addScheduleEntry($employeeID, $arrival, $departure);
 	
@@ -52,7 +52,7 @@ interface DataSource {
 	// Parameters
 	//	$id: ID of the schedule entry to be removed.
 	// Return
-	//	Returns TRUE on success.
+	//	Return TRUE on success.
 	//	Return FALSE on failure.
 	public function removeScheduleEntry($id);
 	
@@ -72,6 +72,50 @@ interface DataSource {
 	//		)
 	//	Return FALSE on failure.
 	public function getEmployees($active = TRUE);
+	
+	// Method getEmployee
+	//	This method is called when a user wishes to receive the details for a single employee.
+	// Parameters
+	//	$id: Employee ID of employee for which details are to be queried
+	// Return
+	//	Return an associative array of the form:
+	//		Array (
+	//			'id': ID of Employee, numeric.
+	//			'lastname': Last name of employee, string.
+	//			'firstname': First name of employee, string.
+	//		)
+	//	Return FALSE on failure.
+	public function getEmployee($id);
+	
+	// Method addEmployee
+	//	This method is called to add an employee to the datasource.
+	// Parameters
+	//	$lastName: String indicating the last name of the employee
+	//	$firstName: String indicating the first name of the employee
+	// Return
+	//	Return TRUE on success.
+	//	Return FALSE on failure.
+	public function addEmployee($lastName, $firstName);
+	
+	// Method removeEmployee
+	//	This method is called to remove an employee based on an Employee ID
+	// Parameters
+	//	$id: Employee ID of employee to be removed
+	// Return
+	//	Return TRUE on success.
+	//	Return FALSE on failure.
+	public function removeEmployee($id);
+	
+	// Method editEmployee
+	//	This method is called to modify details of an employee, based on their employee ID
+	// Parameters
+	//	$id: Employee ID of employee to be modified
+	//	$lastName: New last name of employee
+	//	$firstName: New first name of employee
+	// Return
+	//	Return TRUE on success.
+	//	Return FALSE on failure.
+	public function editEmployee($id, $lastName, $firstName);
 	
 	// Method clockIn
 	//	This method is called when the user clocks in an employee.

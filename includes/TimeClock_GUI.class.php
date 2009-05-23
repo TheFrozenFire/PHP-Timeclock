@@ -143,8 +143,8 @@ class TimeClock_GUI {
 	
 	public function aboutDialog() {
 		$aboutDialog = new GtkAboutDialog();
-		$aboutDialog->set_program_name('PHP Time Clock');
-		$aboutDialog->set_version('0.1');
+		$aboutDialog->set_name('PHP Time Clock');
+		$aboutDialog->set_version('0.2');
 		$aboutDialog->set_comments("PHP Time Clock is written entirely in PHP, using PHP-GTK for the Graphical User Interface.\nTo see more about PHP-GTK, please go to http://gtk.php.net");
 		$aboutDialog->set_copyright("Copyright (C) Justin Martin 2009");
 		$aboutDialog->set_logo($aboutDialog->render_icon(Gtk::STOCK_EDIT, Gtk::ICON_SIZE_LARGE_TOOLBAR));
@@ -191,6 +191,10 @@ class TimeClock_GUI {
 		$toolButtons->add($removeEmployee = GtkToolButton::new_from_stock(Gtk::STOCK_REMOVE));
 		$toolButtons->add($editEmployee = GtkToolButton::new_from_stock(Gtk::STOCK_EDIT));
 		
+		$addEmployee->connect_simple('clicked', array($this, 'editEmployeesAdd'), $employeeStore);
+		$removeEmployee->connect_simple('clicked', array($this, 'editEmployeesRemove'), array($employeeView, $employeeStore));
+		$editEmployee->connect_simple('clicked', array($this, 'editEmployeesEdit'), array($employeeView, $employeeStore));
+		
 		$dialog->show_all();
 		$dialog->run();
 		$dialog->destroy();
@@ -233,8 +237,12 @@ class TimeClock_GUI {
 		$dialog->destroy();
 	}
 	
-	public function editEmployeesRemove($employeeView, $employeeStore) {
-		list($model, $iter) = $employeeStore->get_selection()->get_selected();
+	public function editEmployeesRemove($viewStore) {
+		$employeeView = $viewStore[0];
+		$employeeStore = $viewStore[1];
+		list($model, $iter) = $employeeView->get_selection()->get_selected();
+		
+		if(!$iter) return FALSE;
 		
 		$id = $model->get_value($iter, 0);
 		
@@ -245,7 +253,9 @@ class TimeClock_GUI {
 		foreach($employees as $employee) $employeeStore->append(array($employee['id'], "{$employee['lastname']}, {$employee['firstname']}"));
 	}
 	
-	public function editEmployeesEdit($employeeView, $employeeStore) {
+	public function editEmployeesEdit($viewStore) {
+		$employeeView = $viewStore[0];
+		$employeeStore = $viewStore[1];
 		$dialog = new GtkDialog(
 			'Edit Employee',
 			NULL,
@@ -257,6 +267,8 @@ class TimeClock_GUI {
 		);
 		
 		list($model, $iter) = $employeeView->get_selection()->get_selected();
+		
+		if(!$iter) return FALSE;
 		
 		$id = $model->get_value($iter, 0);
 		

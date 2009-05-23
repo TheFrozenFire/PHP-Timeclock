@@ -98,6 +98,58 @@ class SQLite_DataSource implements DataSource {
 		} else return FALSE;
 	}
 	
+	public function getEmployee($id) {
+		$statement = $this->connection->prepare(
+			'SELECT `id`, `last_name`, `first_name` FROM `employees` WHERE `id` = :id'
+		);
+		
+		$statement->bindValue(':id', $id);
+		
+		if($statement->execute()) {
+			$result = $statement->fetch(PDO::FETCH_ASSOC);
+			if(empty($result)) return FALSE;
+			
+			return array(
+				'id'=>$result['id'],
+				'lastname'=>$result['last_name'],
+				'firstname'=>$result['first_name']
+			);
+		} else return FALSE;
+	}
+	
+	public function addEmployee($lastName, $firstName) {
+		$statement = $this->connection->prepare(
+			'INSERT INTO `employees` (`last_name`, `first_name`) VALUES (:last_name, :first_name)'
+		);
+		
+		$statement->bindValue(':last_name', $lastName);
+		$statement->bindValue(':first_name', $firstName);
+		
+		return $statement->execute();
+	}
+	
+	public function removeEmployee($id) {
+		$statement = $this->connection->prepare(
+			'DELETE FROM `employees` WHERE `id` = :id'
+		);
+		
+		$statement->bindValue(':id', $id);
+		
+		return $statement->execute();
+	}
+	
+	public function editEmployee($id, $lastName, $firstName) {
+		$statement = $this->connection->prepare(
+			'UPDATE `employees` SET `last_name` = :last_name, `first_name` = :first_name WHERE `id` = :id'
+		);
+		
+		$statement->bindValue(':last_name', $lastName);
+		$statement->bindValue(':first_name', $firstName);
+		$statement->bindValue(':id', $id);
+		
+		return $statement->execute();
+	}
+	
 	public function clockIn($id, $hash = NULL, $time = NULL) {
 		if(is_null($time)) $time = time();
 		$statement = $this->connection->prepare(
